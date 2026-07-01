@@ -136,9 +136,8 @@ public class PterodactylClient {
     /**
      * Queries the Client API to obtain the server's current power state.
      * <p>
-     * This endpoint usually requires a {@code ptla_} (Client) API key,
-     * but many panels accept the {@code ptlc_} key for admin users as
-     * well. Returns {@link Optional#empty()} if the call fails.
+     * This endpoint usually requires a {@code ptlc_} (Client) API key.
+     * Returns {@link Optional#empty()} if the call fails.
      */
     public Optional<ServerResources> fetchServerResources(final String serverId) {
         try {

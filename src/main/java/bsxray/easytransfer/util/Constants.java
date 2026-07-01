@@ -15,7 +15,7 @@ public final class Constants {
     /* ───── Config file keys ───── */
 
     public static final String CONFIG_PANEL_DOMAIN    = "panel_domain";
-    public static final String CONFIG_PTLC_API_KEY    = "ptlc_api_key";
+    public static final String CONFIG_PTLC_API_KEY    = "api_key";
     public static final String CONFIG_WAITING_SERVER  = "waiting_server";
     public static final String CONFIG_ALIAS           = "alias";
 

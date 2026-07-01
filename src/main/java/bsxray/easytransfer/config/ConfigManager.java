@@ -41,7 +41,7 @@ public class ConfigManager {
     private final File configFile;
 
     private String panelDomain   = "";
-    private String ptlcApiKey   = "";
+    private String apiKey   = "";
     private String waitingServer = "";
     private String alias         = DEFAULT_ALIAS;
 
@@ -66,9 +66,9 @@ public class ConfigManager {
         return panelDomain;
     }
 
-    /** Returns the ptlc_ API key, may be empty. */
-    public String ptlcApiKey() {
-        return ptlcApiKey;
+    /** Returns the API key, may be empty. */
+    public String apiKey() {
+        return apiKey;
     }
 
     /** Returns the waiting server alias, may be empty (disabled). */
@@ -206,7 +206,7 @@ public class ConfigManager {
                     // top-level setting
                     switch (key) {
                         case CONFIG_PANEL_DOMAIN   -> panelDomain = value;
-                        case CONFIG_PTLC_API_KEY   -> ptlcApiKey = value;
+                        case CONFIG_PTLC_API_KEY   -> apiKey = value;
                         case CONFIG_WAITING_SERVER -> waitingServer = value;
                         case CONFIG_ALIAS          -> alias = value;
                         default -> log.debug("Ignoring unknown setting '{}' at line {}", key, lineNumber);
