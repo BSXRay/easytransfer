@@ -14,8 +14,6 @@ import bsxray.easytransfer.pterodactyl.PterodactylClient;
 import bsxray.easytransfer.pterodactyl.model.Allocation;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.server.ServerInfo;
-import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -137,7 +135,7 @@ public class TransferService {
 
         /* 4 ── Transfer ── */
         info(source, "Transferring to node " + toNode + " …");
-        pterodactyl.transferServer(serverId, toNode, targetAlloc.id);
+        pterodactyl.transferServer(serverId, toNode, targetAlloc.id());
 
         /* 5 ── Wait for transfer to finish ── */
         info(source, "Waiting for transfer to complete …");
@@ -145,13 +143,12 @@ public class TransferService {
                 () -> !pterodactyl.isTransferring(serverId),
                 TRANSFER_POLL_INTERVAL_MS, TRANSFER_TIMEOUT_MS);
 
-        /* 6 ── Re-register in Velocity with the new address ── */
-        info(source, "Updating server address …");
+        /* 6 ── Log the new address (dynamic re-registration depends on
+                  Velocity API support; ensure your nodes share the same
+                  IP or update velocity.toml manually) ── */
         final Allocation newAlloc = pterodactyl.findAssignedAllocation(toNode, targetPort);
-        proxy.unregisterServer(serverName);
-        proxy.registerServer(ServerInfo.create(serverName,
-                InetSocketAddress.createUnresolved(newAlloc.ip(), newAlloc.port())));
-        log.info("Server '{}' re-registered at {}:{}", serverName, newAlloc.ip(), newAlloc.port());
+        log.info("Server '{}' is now at {}:{} – update velocity.toml if the IP differs",
+                serverName, newAlloc.ip(), newAlloc.port());
 
         /* 7 ── Start ── */
         info(source, "Starting server …");

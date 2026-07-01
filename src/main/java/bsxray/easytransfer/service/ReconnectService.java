@@ -67,14 +67,15 @@ public class ReconnectService {
         }
 
         proxy.getServer(serverName).ifPresent(rs -> {
-            int count = 0;
+            final java.util.concurrent.atomic.AtomicInteger count =
+                    new java.util.concurrent.atomic.AtomicInteger(0);
             for (String name : names) {
                 proxy.getPlayer(name).ifPresent(player -> {
                     player.createConnectionRequest(rs).fireAndForget();
-                    count++;
+                    count.incrementAndGet();
                 });
             }
-            log.info("Restored {} players to '{}'", count, serverName);
+            log.info("Restored {} players to '{}'", count.get(), serverName);
         });
     }
 }
