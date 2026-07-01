@@ -63,7 +63,7 @@ public class EasyTransfer {
 
         /* pterodactyl api client */
         this.pterodactyl = new PterodactylClient();
-        this.pterodactyl.updateCredentials(config.panelDomain(), config.apiKey());
+        this.pterodactyl.updateCredentials(config.panelDomain(), config.apiKey(), config.clientApiKey());
 
         /* services */
         this.reconnect       = new ReconnectService(proxy);
@@ -91,7 +91,7 @@ public class EasyTransfer {
     /** Reloads config, reconnects API and re-registers the command. */
     public void reload() {
         config.reload();
-        pterodactyl.updateCredentials(config.panelDomain(), config.apiKey());
+        pterodactyl.updateCredentials(config.panelDomain(), config.apiKey(), config.clientApiKey());
         commandManager.register(config);
         log.info("EasyTransfer reloaded");
     }

@@ -15,7 +15,8 @@ public final class Constants {
     /* ───── Config file keys ───── */
 
     public static final String CONFIG_PANEL_DOMAIN    = "panel_domain";
-    public static final String CONFIG_PTLC_API_KEY    = "api_key";
+    public static final String CONFIG_API_KEY         = "api_key";
+    public static final String CONFIG_API_KEY_CLIENT  = "api_key_client";
     public static final String CONFIG_WAITING_SERVER  = "waiting_server";
     public static final String CONFIG_ALIAS           = "alias";
 
@@ -42,6 +43,7 @@ public final class Constants {
     public static final String API_POWER             = "/power";
     public static final String API_TRANSFER          = "/transfer";
     public static final String API_NODE_ALLOCATIONS  = "/api/application/nodes/%d/allocations";
+    public static final String API_CLIENT_POWER      = "/api/client/servers/%s/power";
     public static final String API_CLIENT_RESOURCES  = "/api/client/servers/%s/resources";
 
     /* ───── Server state constants ───── */
@@ -58,7 +60,8 @@ public final class Constants {
 
     private static final java.util.Set<String> SETTING_KEYS = java.util.Set.of(
             CONFIG_PANEL_DOMAIN,
-            CONFIG_PTLC_API_KEY,
+            CONFIG_API_KEY,
+            CONFIG_API_KEY_CLIENT,
             CONFIG_WAITING_SERVER,
             CONFIG_ALIAS
     );

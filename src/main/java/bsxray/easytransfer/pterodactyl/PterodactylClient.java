@@ -1,5 +1,6 @@
 package bsxray.easytransfer.pterodactyl;
 
+import static bsxray.easytransfer.util.Constants.API_CLIENT_POWER;
 import static bsxray.easytransfer.util.Constants.API_CLIENT_RESOURCES;
 import static bsxray.easytransfer.util.Constants.API_NODE_ALLOCATIONS;
 import static bsxray.easytransfer.util.Constants.API_POWER;
@@ -39,6 +40,7 @@ public class PterodactylClient {
 
     private volatile String baseUrl;
     private volatile String apiKey;
+    private volatile String clientKey;
 
     public PterodactylClient() {
         this.http = HttpClient.newBuilder()
@@ -48,28 +50,33 @@ public class PterodactylClient {
 
     /* ───── credential management ───── */
 
-    /** Updates stored panel URL and API key (called on init & reload). */
-    public void updateCredentials(final String panelDomain, final String apiKey) {
+    /** Updates stored panel URL and API keys (called on init & reload). */
+    public void updateCredentials(final String panelDomain,
+                                   final String apiKey,
+                                   final String clientKey) {
         String domain = panelDomain;
         if (!domain.startsWith("http://") && !domain.startsWith("https://")) {
             domain = "https://" + domain;
         }
-        this.baseUrl = domain;
-        this.apiKey  = apiKey;
+        this.baseUrl   = domain;
+        this.apiKey    = apiKey;
+        this.clientKey = clientKey;
         log.info("PterodactylClient credentials updated (base: {})", domain);
     }
 
     /* ───── high-level API methods ───── */
 
     /**
-     * Sends a power action to the server (start / stop / restart / kill).
+     * Sends a power action to the server (start / stop / restart / kill)
+     * via the Client API.
      *
-     * @param serverId Pterodactyl application server id
+     * @param serverId Pterodactyl application server id (numeric)
      * @param signal   power signal
      */
     public void powerAction(final String serverId, final String signal) {
         log.info("Sending power action '{}' to server {}", signal, serverId);
-        post(endpoint(API_SERVERS + serverId + API_POWER),
+        final String identifier = fetchServerIdentifier(serverId);
+        clientPost(endpoint(API_CLIENT_POWER.formatted(identifier)),
                 "{\"signal\":\"" + signal + "\"}");
     }
 
@@ -142,14 +149,14 @@ public class PterodactylClient {
     public Optional<ServerResources> fetchServerResources(final String serverId) {
         try {
             final String identifier = fetchServerIdentifier(serverId);
-            final String body = get(endpoint(API_CLIENT_RESOURCES.formatted(identifier)));
+            final String body = clientGet(endpoint(API_CLIENT_RESOURCES.formatted(identifier)));
             final JsonObject attrs = JsonParser.parseString(body)
                     .getAsJsonObject()
                     .getAsJsonObject("attributes");
             final String state = attrs.get("current_state").getAsString();
             return Optional.of(new ServerResources(state));
         } catch (Exception e) {
-            log.warn("Could not fetch server resources (ptla_ key may be required): {}",
+            log.warn("Could not fetch server resources (client API key may be required): {}",
                     e.getMessage());
             return Optional.empty();
         }
@@ -178,6 +185,14 @@ public class PterodactylClient {
                 .timeout(Duration.ofSeconds(HTTP_TIMEOUT_SECONDS));
     }
 
+    private HttpRequest.Builder clientRequest(final String url) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Accept", "application/json")
+                .header("Authorization", "Bearer " + clientKey)
+                .timeout(Duration.ofSeconds(HTTP_TIMEOUT_SECONDS));
+    }
+
     private String get(final String url) {
         try {
             final HttpRequest req = request(url).GET().build();
@@ -195,9 +210,45 @@ public class PterodactylClient {
         }
     }
 
+    private String clientGet(final String url) {
+        try {
+            final HttpRequest req = clientRequest(url).GET().build();
+            final HttpResponse<String> res = http.send(req,
+                    HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() < 200 || res.statusCode() >= 300) {
+                throw new PterodactylException(
+                        "GET %s returned %d: %s".formatted(url, res.statusCode(), res.body()));
+            }
+            return res.body();
+        } catch (PterodactylException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PterodactylException("GET %s failed".formatted(url), e);
+        }
+    }
+
     private void post(final String url, final String jsonBody) {
         try {
             final HttpRequest req = request(url)
+                    .header("Content-Type", "application/json")
+                    .POST(BodyPublishers.ofString(jsonBody))
+                    .build();
+            final HttpResponse<String> res = http.send(req,
+                    HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() < 200 || res.statusCode() >= 300) {
+                throw new PterodactylException(
+                        "POST %s returned %d: %s".formatted(url, res.statusCode(), res.body()));
+            }
+        } catch (PterodactylException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PterodactylException("POST %s failed".formatted(url), e);
+        }
+    }
+
+    private void clientPost(final String url, final String jsonBody) {
+        try {
+            final HttpRequest req = clientRequest(url)
                     .header("Content-Type", "application/json")
                     .POST(BodyPublishers.ofString(jsonBody))
                     .build();

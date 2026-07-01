@@ -1,8 +1,9 @@
 package bsxray.easytransfer.config;
 
 import static bsxray.easytransfer.util.Constants.CONFIG_ALIAS;
+import static bsxray.easytransfer.util.Constants.CONFIG_API_KEY;
+import static bsxray.easytransfer.util.Constants.CONFIG_API_KEY_CLIENT;
 import static bsxray.easytransfer.util.Constants.CONFIG_PANEL_DOMAIN;
-import static bsxray.easytransfer.util.Constants.CONFIG_PTLC_API_KEY;
 import static bsxray.easytransfer.util.Constants.CONFIG_WAITING_SERVER;
 import static bsxray.easytransfer.util.Constants.DEFAULT_ALIAS;
 import static bsxray.easytransfer.util.Constants.PROFILE_ALLOC_PORT;
@@ -41,7 +42,8 @@ public class ConfigManager {
     private final File configFile;
 
     private String panelDomain   = "";
-    private String apiKey   = "";
+    private String apiKey        = "";
+    private String clientApiKey  = "";
     private String waitingServer = "";
     private String alias         = DEFAULT_ALIAS;
 
@@ -66,9 +68,14 @@ public class ConfigManager {
         return panelDomain;
     }
 
-    /** Returns the API key, may be empty. */
+    /** Returns the Application API key (ptla_), may be empty. */
     public String apiKey() {
         return apiKey;
+    }
+
+    /** Returns the Client API key (ptlc_), may be empty. */
+    public String clientApiKey() {
+        return clientApiKey;
     }
 
     /** Returns the waiting server alias, may be empty (disabled). */
@@ -206,7 +213,8 @@ public class ConfigManager {
                     // top-level setting
                     switch (key) {
                         case CONFIG_PANEL_DOMAIN   -> panelDomain = value;
-                        case CONFIG_PTLC_API_KEY   -> apiKey = value;
+                        case CONFIG_API_KEY        -> apiKey = value;
+                        case CONFIG_API_KEY_CLIENT -> clientApiKey = value;
                         case CONFIG_WAITING_SERVER -> waitingServer = value;
                         case CONFIG_ALIAS          -> alias = value;
                         default -> log.debug("Ignoring unknown setting '{}' at line {}", key, lineNumber);
@@ -250,7 +258,8 @@ public class ConfigManager {
 
     private static boolean isSettingKey(final String key) {
         return CONFIG_PANEL_DOMAIN.equals(key)
-                || CONFIG_PTLC_API_KEY.equals(key)
+                || CONFIG_API_KEY.equals(key)
+                || CONFIG_API_KEY_CLIENT.equals(key)
                 || CONFIG_WAITING_SERVER.equals(key)
                 || CONFIG_ALIAS.equals(key);
     }
